@@ -1,0 +1,22 @@
+﻿# ============================================================
+# Codex GLM-5.2 Profile
+# ============================================================
+# This profile overrides ONLY the model settings while inheriting
+# everything else (MCP servers, plugins, features) from your main
+# config.toml.  Switch to it with:  codex --profile glm52
+#
+# Requires the local Responses-to-Chat proxy running on 127.0.0.1:11439
+# Start it with: codex/scripts/start-proxy  (or start-codex-glm52)
+# ============================================================
+
+model = "glm-5.2"
+model_provider = "zai_coding"
+model_context_window = 1000000
+model_reasoning_effort = "xhigh"
+model_supports_reasoning_summaries = true
+model_reasoning_summary = "auto"
+model_verbosity = "high"
+
+[model_providers.zai_coding]
+name = "Z.ai GLM Coding Plan via local Responses proxy"
+base_url = "http://127.0.0.1:11439"

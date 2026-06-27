@@ -1,0 +1,16 @@
+﻿# Logs
+*.log
+*.out
+*.err
+
+# Codex runtime artifacts
+.codex/
+zai-codex-proxy.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

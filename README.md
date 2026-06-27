@@ -17,21 +17,30 @@
 > **Paste this to your coding agent (Codex, Claude, Cursor, etc.) to set everything up automatically:**
 
 ```text
-Clone https://github.com/MeroZemory/glm52-setup and run the installer for my OS
-(powershell -ExecutionPolicy Bypass -File install.ps1 on Windows,
- bash install.sh on Linux/macOS).
+Set up GLM-5.2 for my Codex using https://github.com/MeroZemory/glm52-setup.
 
-The installer copies the proxy, profile, and scripts into ~/.codex/,
-backs up my existing config.toml, and patches it with the
-[model_providers.zai_coding] block.
+Steps:
+1. Ask me for my Z.ai API key (I'll get it from https://z.ai).
+   Save it securely: set ZAI_API_KEY as a persistent User environment
+   variable on Windows, or add `export ZAI_API_KEY="..."` to my
+   ~/.bashrc on Linux/macOS. Do NOT hardcode it in any file.
 
-After install, verify the setup works by running start-codex-glm52
-and sending a simple test prompt. If verification fails after 3 attempts,
-run rollback.ps1 (Windows) or rollback.sh (Linux/macOS) to fully revert,
-then tell me what went wrong.
+2. Clone the repo and run the installer for my OS
+   (powershell -ExecutionPolicy Bypass -File install.ps1 on Windows,
+    bash install.sh on Linux/macOS).
+   The installer is non-interactive — it copies the proxy, profile,
+   and scripts into ~/.codex/, backs up my config.toml, and patches it
+   with the [model_providers.zai_coding] block.
+
+3. Verify the setup works: start the proxy, then send a simple test
+   prompt via `codex --profile glm52`. Check that GLM-5.2 responds.
+
+4. If verification fails after 3 attempts, run rollback.ps1 (Windows)
+   or rollback.sh (Linux/macOS) to fully revert, then tell me what
+   went wrong.
 ```
 
-The agent will: **clone → install → verify → (rollback if broken)** — hands-free.
+The agent will: **ask for key → save securely → clone → install → verify → (rollback if broken)** — hands-free.
 
 ---
 
@@ -58,7 +67,23 @@ This kills the proxy, removes all installed files, and restores your original `c
 - [Node.js](https://nodejs.org) 18+
 - Z.ai API key — get one at [https://z.ai](https://z.ai)
 
-### Install
+### 1. Set Your API Key First
+
+The installer is **non-interactive** — it expects `ZAI_API_KEY` to already be in your environment.
+
+**Windows:**
+```powershell
+setx ZAI_API_KEY "your-key-here"
+# Then open a NEW terminal (env vars don't apply to the current session)
+```
+
+**Linux/macOS:**
+```bash
+echo 'export ZAI_API_KEY="your-key-here"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 2. Install
 
 **Windows (tested ✅):**
 ```powershell
@@ -77,13 +102,12 @@ bash install.sh
 > ⚠️ **The Linux/macOS scripts (`.sh`) are untested.** They were written to mirror the Windows logic but have not been verified on any Linux distro or macOS version. If you're on Linux/macOS, please review the scripts before running and report any issues.
 
 The installer will:
-1. ✅ Check Node.js + Codex CLI
+1. ✅ Check Node.js + Codex CLI + `ZAI_API_KEY`
 2. ✅ **Back up** your existing `config.toml` → `config.toml.pre-glm52.bak`
 3. ✅ Copy the proxy, profile, and scripts to `~/.codex/`
 4. ✅ **Patch** `config.toml` with the `[model_providers.zai_coding]` block
-5. ✅ Prompt for your `ZAI_API_KEY` and save it
 
-### Run
+### 3. Run
 
 ```bash
 # Option A: one-shot (starts proxy + codex)

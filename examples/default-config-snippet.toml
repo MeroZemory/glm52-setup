@@ -1,18 +1,14 @@
 ﻿# Example: Default config.toml (keeps GPT-5.5)
 
 # This is YOUR main config.toml — it stays untouched.
-# The glm52 profile only overrides model + provider.
+# The glm52 profile contains its own provider definition.
 
 model = "gpt-5.5"                    # ← your default stays as-is
 model_provider = "openai"
 model_context_window = 1000000
 
 # ... all your MCP servers, plugins, features stay here ...
-
-[model_providers.zai_coding]
-name = "Z.ai GLM Coding Plan via local Responses proxy"
-base_url = "http://127.0.0.1:11439"
-
-# That's it. The [model_providers.zai_coding] entry above is the ONLY
-# thing you need in your main config. The profile (glm52.config.toml)
-# does the rest when you run:  codex --profile glm52
+#
+# Do not add [model_providers.zai_coding] here. Keeping that provider
+# inside glm52.config.toml prevents the default /model menu from being
+# narrowed to the local GLM proxy's model catalog.

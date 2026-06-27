@@ -2,6 +2,9 @@
 # ============================================================
 # Codex GLM-5.2 Setup — Linux/macOS Rollback
 # ============================================================
+# ⚠️  NOTE: Linux/macOS scripts are UNTESTED.
+#     Tested and verified on Windows only. Use at your own risk.
+# ============================================================
 # Removes every trace of the GLM-5.2 integration from CODEX_HOME:
 #   - Kills the proxy process on port 11439
 #   - Removes proxy, profile, and scripts
@@ -24,6 +27,8 @@ ok()    { printf '[+] %s\n' "$1"; }
 
 cyan "Codex GLM-5.2 Rollback"
 echo  "    CODEX_HOME: $CODEX_HOME"
+echo
+yellow "⚠️  Linux/macOS scripts are UNTESTED. Verify manually."
 echo
 
 # --- 1. Kill proxy on port 11439 ---
@@ -74,7 +79,6 @@ if [ -f "$config_bak" ]; then
   ok "config.toml restored from backup."
 elif [ -f "$config_path" ]; then
   # Surgically remove the [model_providers.zai_coding] block
-  # Uses awk to skip from the section header to the next section
   tmp="$(mktemp)"
   awk '
     /^\[model_providers\.zai_coding\]/ { skip=1; next }

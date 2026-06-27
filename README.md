@@ -1,4 +1,4 @@
-﻿# glm52-setup
+# glm52-setup
 
 > Use **Z.ai GLM-5.2** inside **OpenAI Codex** — with full MCP, plugin, and feature inheritance from your existing GPT-5.5 setup. Zero disruption to your default model.
 
@@ -10,20 +10,47 @@
 └─────────────┘
 ```
 
-## Why?
+---
 
-- **Keep GPT-5.5 as default** — GLM-5.2 runs as a *profile*, not a replacement
-- **Full MCP inheritance** — all your MCP servers, plugins, skills work unchanged
-- **Cost-effective** — route heavy reasoning tasks to GLM when GPT quota runs out
-- **One command** — `start-codex-glm52` starts the proxy + launches Codex
+## 🧠 For AI Agents: One-Prompt Setup
 
-## How It Works
+> **Paste this to your coding agent (Codex, Claude, Cursor, etc.) to set everything up automatically:**
 
-1. **Profile override** (`glm52.config.toml`) sets `model = "glm-5.2"` and `model_provider = "zai_coding"` while inheriting everything else from your main `config.toml`
-2. **Local proxy** (`zai-codex-responses-proxy.mjs`) translates Codex's OpenAI Responses API calls into Z.ai's Chat Completions API — including tool calls, streaming, and reasoning
-3. **Launch scripts** start the proxy in the background, then launch Codex with the profile
+```text
+Clone https://github.com/MeroZemory/glm52-setup and run the installer for my OS
+(powershell -ExecutionPolicy Bypass -File install.ps1 on Windows,
+ bash install.sh on Linux/macOS).
 
-## Quick Start
+The installer copies the proxy, profile, and scripts into ~/.codex/,
+backs up my existing config.toml, and patches it with the
+[model_providers.zai_coding] block.
+
+After install, verify the setup works by running start-codex-glm52
+and sending a simple test prompt. If verification fails after 3 attempts,
+run rollback.ps1 (Windows) or rollback.sh (Linux/macOS) to fully revert,
+then tell me what went wrong.
+```
+
+The agent will: **clone → install → verify → (rollback if broken)** — hands-free.
+
+---
+
+## ⚠️ If Your Agent Goes Silent / Unresponsive
+
+> **Run this one command to fully undo everything:**
+
+| OS | Rollback command |
+|---|---|
+| **Windows** | `powershell -ExecutionPolicy Bypass -File rollback.ps1` |
+| **Linux/macOS** | `bash rollback.sh` |
+
+This kills the proxy, removes all installed files, and restores your original `config.toml` from backup. **No manual cleanup needed. Your GPT-5.5 default is 100% unaffected.**
+
+> ℹ️ The rollback scripts are **deterministic** — they don't depend on the agent. You can run them yourself in a terminal even if Codex is completely frozen or you've hit a usage limit. They're committed to the repo at `rollback.ps1` / `rollback.sh`.
+
+---
+
+## Quick Start (Manual)
 
 ### Prerequisites
 
@@ -31,26 +58,30 @@
 - [Node.js](https://nodejs.org) 18+
 - Z.ai API key — get one at [https://z.ai](https://z.ai)
 
-### Install (one command)
+### Install
 
-**Windows (PowerShell):**
+**Windows (tested ✅):**
 ```powershell
 git clone https://github.com/MeroZemory/glm52-setup.git
 cd glm52-setup
 powershell -ExecutionPolicy Bypass -File install.ps1
 ```
 
-**Linux / macOS:**
+**Linux / macOS (untested ⚠️):**
 ```bash
 git clone https://github.com/MeroZemory/glm52-setup.git
 cd glm52-setup
 bash install.sh
 ```
 
+> ⚠️ **The Linux/macOS scripts (`.sh`) are untested.** They were written to mirror the Windows logic but have not been verified on any Linux distro or macOS version. If you're on Linux/macOS, please review the scripts before running and report any issues.
+
 The installer will:
 1. ✅ Check Node.js + Codex CLI
-2. ✅ Copy the proxy, profile, and scripts to `~/.codex/`
-3. ✅ Prompt for your `ZAI_API_KEY` and save it
+2. ✅ **Back up** your existing `config.toml` → `config.toml.pre-glm52.bak`
+3. ✅ Copy the proxy, profile, and scripts to `~/.codex/`
+4. ✅ **Patch** `config.toml` with the `[model_providers.zai_coding]` block
+5. ✅ Prompt for your `ZAI_API_KEY` and save it
 
 ### Run
 
@@ -67,27 +98,34 @@ codex --profile glm52    # launch codex with GLM-5.2
 
 Just use `codex` normally — no flags needed. Your default model is untouched.
 
-## Repository Structure
+### Uninstall / Roll Back
 
+```bash
+# Windows
+powershell -ExecutionPolicy Bypass -File rollback.ps1
+
+# Linux/macOS
+bash rollback.sh
 ```
-glm52-setup/
-├── proxy/
-│   └── zai-codex-responses-proxy.mjs   # Responses→Chat translation proxy
-├── codex/
-│   ├── profiles/
-│   │   └── glm52.config.toml            # Model override profile
-│   └── scripts/
-│       ├── start-proxy.{cmd,sh}         # Launch proxy in background
-│       ├── stop-proxy.{cmd,sh}          # Kill proxy
-│       └── start-codex-glm52.{cmd,sh}   # Proxy + codex launcher
-├── claude/
-│   └── ROADMAP.md                       # Claude Code integration (planned)
-├── examples/
-│   └── default-config-snippet.toml      # How your main config coexists
-├── install.ps1                          # Windows installer
-├── install.sh                           # Linux/macOS installer
-└── README.md
-```
+
+Removes everything, restores your original config. Safe to run multiple times.
+
+---
+
+## How It Works
+
+1. **Profile override** (`glm52.config.toml`) sets `model = "glm-5.2"` and `model_provider = "zai_coding"` while inheriting everything else from your main `config.toml`
+2. **Local proxy** (`zai-codex-responses-proxy.mjs`) translates Codex's OpenAI Responses API calls into Z.ai's Chat Completions API — including tool calls, streaming, and reasoning
+3. **Launch scripts** start the proxy in the background, then launch Codex with the profile
+
+## Why?
+
+- **Keep GPT-5.5 as default** — GLM-5.2 runs as a *profile*, not a replacement
+- **Full MCP inheritance** — all your MCP servers, plugins, skills work unchanged
+- **Cost-effective** — route heavy reasoning tasks to GLM when GPT quota runs out
+- **One command** — `start-codex-glm52` starts the proxy + launches Codex
+
+---
 
 ## What Gets Inherited?
 
@@ -106,6 +144,30 @@ When you run `codex --profile glm52`, **everything except the model is inherited
 
 This means **your MCP servers (Playwright, Jira, IDA, etc.), plugins (GitHub, Figma, Browser), and all features work identically** with GLM-5.2.
 
+---
+
+## Repository Structure
+
+```
+glm52-setup/
+├── proxy/
+│   └── zai-codex-responses-proxy.mjs   # Responses→Chat translation proxy
+├── codex/
+│   ├── profiles/
+│   │   └── glm52.config.toml            # Model override profile
+│   └── scripts/
+│       ├── start-proxy.{cmd,sh}         # Launch proxy in background
+│       ├── stop-proxy.{cmd,sh}          # Kill proxy
+│       └── start-codex-glm52.{cmd,sh}   # Proxy + codex launcher
+├── install.ps1                          # Windows installer (tested)
+├── install.sh                           # Linux/macOS installer (untested)
+├── rollback.ps1                         # Windows rollback (tested)
+├── rollback.sh                          # Linux/macOS rollback (untested)
+└── README.md
+```
+
+---
+
 ## Configuration Details
 
 ### Environment Variables
@@ -118,9 +180,9 @@ This means **your MCP servers (Playwright, Jira, IDA, etc.), plugins (GitHub, Fi
 | `ZAI_CODEX_PROXY_HOST` | ❌ | Proxy bind host (default: `127.0.0.1`) |
 | `ZAI_CODEX_PROXY_PORT` | ❌ | Proxy bind port (default: `11439`) |
 
-### What You Need in Your Main config.toml
+### What Gets Added to Your config.toml
 
-Just add this **one block** to your existing `~/.codex/config.toml`:
+The installer automatically appends this block (and backs up the original first):
 
 ```toml
 [model_providers.zai_coding]
@@ -139,6 +201,8 @@ The profile handles the rest.
 | `high` | `high` |
 | `xhigh` / `max` | `max` |
 
+---
+
 ## How the Proxy Works
 
 The proxy (`zai-codex-responses-proxy.mjs`) runs on `127.0.0.1:11439` and:
@@ -154,6 +218,8 @@ The proxy (`zai-codex-responses-proxy.mjs`) runs on `127.0.0.1:11439` and:
 5. **Streams back** SSE events translated to Codex's Responses format
 
 All conversion happens transparently — Codex thinks it's talking to OpenAI.
+
+---
 
 ## Troubleshooting
 
@@ -199,9 +265,19 @@ model_reasoning_effort = "high"   # or "medium", "low"
 ```
 </details>
 
-## Claude Code Support
+<details>
+<summary><b>Config.toml got messed up</b></summary>
 
-See [`claude/ROADMAP.md`](claude/ROADMAP.md). Claude Code uses the Anthropic Messages API (different format), so it requires a separate proxy adapter. Contributions welcome.
+Run rollback, then re-install:
+```bash
+rollback.ps1     # or rollback.sh
+install.ps1      # or install.sh
+```
+
+The rollback restores your original `config.toml` from the backup made during install.
+</details>
+
+---
 
 ## Requirements
 

@@ -7,6 +7,11 @@
 #     and verify each step manually. Bug reports welcome.
 # ============================================================
 # Usage:  bash install.sh
+#
+# Non-interactive: ZAI_API_KEY must be set in the environment
+# BEFORE running this script. If missing, the script prints
+# instructions and exits. AI agents should ask the user for
+# the key, save it to ~/.bashrc, then run.
 # ============================================================
 set -euo pipefail
 
@@ -38,10 +43,28 @@ step "Checking Codex CLI..."
 command -v codex >/dev/null 2>&1 || die "Codex CLI not found. Install OpenAI Codex first."
 ok "Codex CLI found."
 
-# --- 3. CODEX_HOME ---
+# --- 3. Check API key (NON-INTERACTIVE) ---
+step "Checking ZAI_API_KEY..."
+if [ -z "${ZAI_API_KEY:-}" ] && [ -z "${Z_AI_API_KEY:-}" ] && [ -z "${ZHIPUAI_API_KEY:-}" ]; then
+  echo
+  yellow "  ┌──────────────────────────────────────────────────┐"
+  yellow "  │  ZAI_API_KEY is not set.                        │"
+  yellow "  │                                                  │"
+  yellow "  │  AI agents: Ask the user for their key, then:    │"
+  yellow "  │  echo 'export ZAI_API_KEY=\"<key>\"' >> ~/.bashrc  │"
+  yellow "  │  source ~/.bashrc; then re-run this script.      │"
+  yellow "  │                                                  │"
+  yellow "  │  Manual: Get a key at https://z.ai and set it:   │"
+  yellow "  │  export ZAI_API_KEY=\"your-key-here\"              │"
+  yellow "  └──────────────────────────────────────────────────┘"
+  exit 1
+fi
+ok "ZAI_API_KEY found."
+
+# --- 4. CODEX_HOME ---
 mkdir -p "$CODEX_HOME"
 
-# --- 4. Backup config.toml (for rollback) ---
+# --- 5. Backup config.toml (for rollback) ---
 config_path="$CODEX_HOME/config.toml"
 config_bak="$CODEX_HOME/config.toml.pre-glm52.bak"
 step "Backing up config.toml..."
@@ -54,17 +77,17 @@ else
   ok "No config.toml yet."
 fi
 
-# --- 5. Copy proxy ---
+# --- 6. Copy proxy ---
 step "Installing proxy..."
 cp "$REPO_DIR/proxy/zai-codex-responses-proxy.mjs" "$CODEX_HOME/zai-codex-responses-proxy.mjs"
 ok "Proxy installed."
 
-# --- 6. Copy profile ---
+# --- 7. Copy profile ---
 step "Installing glm52 profile..."
 cp "$REPO_DIR/codex/profiles/glm52.config.toml" "$CODEX_HOME/glm52.config.toml"
 ok "Profile installed."
 
-# --- 7. Copy scripts + chmod ---
+# --- 8. Copy scripts + chmod ---
 step "Installing scripts..."
 for s in start-proxy.sh stop-proxy.sh start-codex-glm52.sh; do
   cp "$REPO_DIR/codex/scripts/$s" "$CODEX_HOME/$s"
@@ -72,7 +95,7 @@ for s in start-proxy.sh stop-proxy.sh start-codex-glm52.sh; do
 done
 ok "Scripts installed."
 
-# --- 8. Patch config.toml ---
+# --- 9. Patch config.toml ---
 step "Patching config.toml..."
 if [ -f "$config_path" ]; then
   if grep -q '\[model_providers\.zai_coding\]' "$config_path"; then
@@ -88,26 +111,6 @@ PATCH
   fi
 else
   die "config.toml not found at $config_path. Run Codex at least once first."
-fi
-
-# --- 9. API key ---
-step "Checking ZAI_API_KEY..."
-if [ -z "${ZAI_API_KEY:-}" ] && [ -z "${Z_AI_API_KEY:-}" ] && [ -z "${ZHIPUAI_API_KEY:-}" ]; then
-  echo
-  echo "    ZAI_API_KEY not found in environment."
-  echo "    Get your key at: https://z.ai"
-  read -rp "    Paste your ZAI_API_KEY (or Enter to skip): " KEY
-  if [ -n "$KEY" ]; then
-    for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-      [ -f "$rc" ] && echo "export ZAI_API_KEY=\"$KEY\"" >> "$rc"
-    done
-    export ZAI_API_KEY="$KEY"
-    ok "ZAI_API_KEY saved to shell rc."
-  else
-    echo "    Skipped. Set ZAI_API_KEY manually before use."
-  fi
-else
-  ok "ZAI_API_KEY found."
 fi
 
 # --- 10. Done ---
